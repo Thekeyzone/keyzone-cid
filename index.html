@@ -220,8 +220,15 @@
 
         <!-- Cloudflare Turnstile Captcha -->
 <div style="margin-top:14px;">
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAACZWUXSonkNYzLEv"></div>
+  <div
+    class="cf-turnstile"
+    data-sitekey="0x4AAAAAACZWUXSonkNYzLEv"
+    data-callback="onTurnstileSuccess"
+    data-expired-callback="onTurnstileExpired"
+    data-error-callback="onTurnstileError"
+  ></div>
 </div>
+
 
 
         <div class="meta">
@@ -403,6 +410,23 @@
     applyValidation();
     resetResult();
   });
+let tsToken = "";
+
+window.onTurnstileSuccess = (token) => {
+  tsToken = token;
+  // اختياري: تبدّل status
+  // setStatus("Captcha OK ✅", true);
+};
+
+window.onTurnstileExpired = () => {
+  tsToken = "";
+  // setStatus("Captcha expired", null);
+};
+
+window.onTurnstileError = () => {
+  tsToken = "";
+  // setStatus("Captcha error", null);
+};
 
   getBtn.addEventListener("click", async () => {
   copiedMsg.style.display = "none";
@@ -452,10 +476,8 @@
     showBox("CID: " + currentCID);
     afterRow.style.display = "flex";
   } catch (e) {
-    showBox(
-      "Unable to connect to the server. Make sure it is running on http://localhost:3000",
-      true
-    );
+    showBox("Request failed. Please try again in a moment.", true);
+
   } finally {
     setLoading(false);
     if (window.turnstile) window.turnstile.reset();
