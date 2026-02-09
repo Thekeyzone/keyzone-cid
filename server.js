@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import "dotenv/config";
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.json());
 
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET;
@@ -60,4 +61,5 @@ app.post("/api/get-cid", async (req, res) => {
 // serve index.html + assets (logo, privacy, terms...)
 app.use(express.static("."));
 
-app.listen(3000, () => console.log("Server running at http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Server running on port " + PORT));
