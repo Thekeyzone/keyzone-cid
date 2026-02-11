@@ -8,31 +8,31 @@
 
   <style>
     .brand{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
 
-.logo{
-  width:48px;
-  height:48px;
-  object-fit:contain;
-  border-radius:12px;
-}
+    .logo{
+      width:48px;
+      height:48px;
+      object-fit:contain;
+      border-radius:12px;
+    }
 
-.brandName{
-  margin:0;
-  font-size:22px;
-  font-weight:800;
-  letter-spacing:.3px;
-  line-height:1.1;
-}
+    .brandName{
+      margin:0;
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:.3px;
+      line-height:1.1;
+    }
 
-.brandTag{
-  margin-top:6px;
-  color:var(--muted);
-  font-size:13px;
-}
+    .brandTag{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+    }
 
     :root{
       --bg:#f6f7fb;
@@ -83,7 +83,6 @@
       display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
     }
     h1{margin:0; font-size:22px;}
-    .sub{margin:6px 0 0; color:var(--muted); font-size:13px;}
     .headLeft{min-width:0}
     .headRight{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
     .toggle{
@@ -154,7 +153,6 @@
     a{color:var(--primary); text-decoration:none}
     a:hover{text-decoration:underline}
 
-    /* spinner */
     .spinner{
       width:16px; height:16px; border-radius:50%;
       border:2px solid rgba(255,255,255,.35);
@@ -164,10 +162,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .hintRow{
-      margin-top:10px;
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    }
     .select{
       padding:10px 12px; border-radius:12px;
       border:1px solid rgba(255,255,255,.10);
@@ -176,7 +170,8 @@
       cursor:pointer;
     }
   </style>
-<link rel="icon" type="image/png" href="favicon.png">
+
+  <link rel="icon" type="image/png" href="favicon.png">
 </head>
 
 <body>
@@ -184,31 +179,30 @@
     <div class="card">
       <div class="head">
         <div class="headLeft">
-  <div class="brand">
-    <img src="logo-keyzone.png" alt="KeyZone Logo" class="logo" />
-    <div>
-      <h1 class="brandName">KeyZone</h1>
-      <div class="brandTag">Retrieve your CID instantly</div>
-    </div>
-  </div>
-</div>
-
+          <div class="brand">
+            <img src="logo-keyzone.png" alt="KeyZone Logo" class="logo" />
+            <div>
+              <h1 class="brandName">KeyZone</h1>
+              <div class="brandTag">Retrieve your CID instantly</div>
+            </div>
+          </div>
+        </div>
 
         <div class="headRight">
           <select id="groupSelect" class="select" title="Grouping size">
-            <option value="6" selected>Group: 6 digits</option>
-            <option value="7">Group: 7 digits</option>
+            <option value="6">Group: 6 digits</option>
+            <option value="7" selected>Group: 7 digits</option>
           </select>
           <button id="themeBtn" class="toggle" type="button">🌙 Dark</button>
         </div>
       </div>
 
       <div class="body">
-        <label for="idInput">Enter your ID</label>
-        <textarea id="idInput" placeholder="Example: 123456 789012 345678 ..."></textarea>
+        <label for="idInput">Enter your IID</label>
+        <textarea id="idInput" placeholder="Example: 5579876 0410031 4119531 ... (63 digits)"></textarea>
 
         <div class="row">
-          <button id="getBtn" class="btn btn-primary" type="button">
+          <button id="getBtn" class="btn btn-primary" type="button" disabled>
             <span id="getBtnText">Get CID</span>
             <span id="getBtnSpin" style="display:none" class="spinner" aria-hidden="true"></span>
           </button>
@@ -219,17 +213,15 @@
         </div>
 
         <!-- Cloudflare Turnstile Captcha -->
-<div style="margin-top:14px;">
-  <div
-    class="cf-turnstile"
-    data-sitekey="0x4AAAAAACZWUXSonkNYzLEv"
-    data-callback="onTurnstileSuccess"
-    data-expired-callback="onTurnstileExpired"
-    data-error-callback="onTurnstileError"
-  ></div>
-</div>
-
-
+        <div style="margin-top:14px;">
+          <div
+            class="cf-turnstile"
+            data-sitekey="0x4AAAAAACZWUXSonkNYzLEv"
+            data-callback="onTurnstileSuccess"
+            data-expired-callback="onTurnstileExpired"
+            data-error-callback="onTurnstileError"
+          ></div>
+        </div>
 
         <div class="meta">
           <div class="pill" id="digitsInfo">Digits: 0</div>
@@ -249,7 +241,7 @@
         </div>
 
         <div class="small">
-          Tip: Only digits are kept. Formatting groups the digits (6 or 7) for easier readability.
+          Tip: Your IID must be exactly 63 digits. You can paste it with spaces, we will keep only digits.
         </div>
       </div>
 
@@ -258,12 +250,13 @@
           <a href="privacy.html" target="_blank">Privacy</a> ·
           <a href="terms.html" target="_blank">Terms</a>
         </div>
-        <div><a href="#" id="healthLink">Test server</a></div>
       </div>
     </div>
   </div>
 
 <script>
+  const REQUIRED_DIGITS = 63;
+
   const root = document.documentElement;
 
   const idInput = document.getElementById("idInput");
@@ -280,19 +273,17 @@
 
   const out = document.getElementById("out");
   const outText = document.getElementById("outText");
-  const copyBtn = document.getElementById("copyBtn");
   const afterRow = document.getElementById("afterRow");
   const copiedMsg = document.getElementById("copiedMsg");
-  const healthLink = document.getElementById("healthLink");
+  const copyBtn = document.getElementById("copyBtn");
 
   const themeBtn = document.getElementById("themeBtn");
   const groupSelect = document.getElementById("groupSelect");
 
   let currentCID = "";
+  let tsToken = "";
 
-  function onlyDigits(v){
-    return v.replace(/[^\d]/g, "");
-  }
+  function onlyDigits(v){ return String(v || "").replace(/[^\d]/g, ""); }
 
   function groupDigits(digits, groupSize){
     if(!digits) return "";
@@ -302,7 +293,7 @@
 
   function sanitizeAndFormat(raw){
     const digits = onlyDigits(raw);
-    const g = Number(groupSelect.value || 6);
+    const g = Number(groupSelect.value || 7);
     return groupDigits(digits, g);
   }
 
@@ -310,38 +301,39 @@
     return onlyDigits(v).length;
   }
 
-  function setStatus(text, ok=null){
-    if(ok === true) validInfo.textContent = "Status: Ready ✅";
-    else if(ok === false) validInfo.textContent = "Status: Invalid ❌";
-    else validInfo.textContent = "Status: " + text;
+  function showBox(msg, err=false){
+    out.style.display = "block";
+    out.className = "status" + (err ? " error" : "");
+    outText.textContent = msg;
   }
 
-  function showBox(message, isError=false){
-    out.style.display = "block";
-    out.className = "status" + (isError ? " error" : "");
-    outText.textContent = message;
-  }
+  function hideBox(){ out.style.display = "none"; }
 
   function resetResult(){
     currentCID = "";
     afterRow.style.display = "none";
     copiedMsg.style.display = "none";
-    out.style.display = "none";
-  }
-
-  function setLoading(isLoading){
-    getBtn.disabled = isLoading;
-    getBtnText.textContent = isLoading ? "Processing…" : "Get CID";
-    getBtnSpin.style.display = isLoading ? "inline-block" : "none";
+    hideBox();
   }
 
   function applyValidation(){
     const d = digitsCountFromFormatted(idInput.value);
     digitsInfo.textContent = "Digits: " + d;
 
-    if(d === 0) setStatus("Waiting…", null);
-    else if(d < 6) setStatus("Too short", false);
-    else setStatus("Ready", true);
+    if(d === 0) validInfo.textContent = "Status: Waiting…";
+    else if(d < REQUIRED_DIGITS) validInfo.textContent = `Status: Need ${REQUIRED_DIGITS} digits ❌`;
+    else if(d > REQUIRED_DIGITS) validInfo.textContent = "Status: Too many digits ❌";
+    else validInfo.textContent = "Status: Ready ✅";
+
+    // ✅ زر Get CID مايتفعلش حتى يكون 63 رقم
+    getBtn.disabled = (d !== REQUIRED_DIGITS);
+  }
+
+  function setLoading(v){
+    getBtnText.textContent = v ? "Processing…" : "Get CID";
+    getBtnSpin.style.display = v ? "inline-block" : "none";
+    if (v) getBtn.disabled = true;
+    else applyValidation();
   }
 
   // Theme
@@ -356,34 +348,30 @@
       localStorage.setItem("theme", "light");
     }
   }
+
   themeBtn.addEventListener("click", () => {
     const isDark = root.getAttribute("data-theme") === "dark";
     setTheme(isDark ? "light" : "dark");
   });
 
-  // Load saved theme
-  const savedTheme = localStorage.getItem("theme") || "light";
-  setTheme(savedTheme);
+  setTheme(localStorage.getItem("theme") || "light");
 
-  // Group setting saved
+  // Group setting
   const savedGroup = localStorage.getItem("groupSize");
-  if(savedGroup === "7") groupSelect.value = "7";
+  if(savedGroup === "6" || savedGroup === "7") groupSelect.value = savedGroup;
+  else groupSelect.value = "7";
+
   groupSelect.addEventListener("change", () => {
     localStorage.setItem("groupSize", groupSelect.value);
-    // reformat existing input
     idInput.value = sanitizeAndFormat(idInput.value);
     applyValidation();
     resetResult();
   });
 
-  // Input formatting: keep digits and auto-group on blur (not on every keystroke to avoid cursor jumps)
+  // Input formatting
   idInput.addEventListener("input", () => {
-    // keep only digits/spaces while typing (soft)
     const digits = onlyDigits(idInput.value);
-    // show as-is while typing, but remove letters instantly:
-    const cleaned = digits ? groupDigits(digits, Number(groupSelect.value || 6)) : "";
-    idInput.value = cleaned;
-
+    idInput.value = groupDigits(digits, Number(groupSelect.value || 7));
     applyValidation();
     resetResult();
   });
@@ -410,103 +398,75 @@
     applyValidation();
     resetResult();
   });
-let tsToken = "";
 
-window.onTurnstileSuccess = (token) => {
-  tsToken = token;
-  // اختياري: تبدّل status
-  // setStatus("Captcha OK ✅", true);
-};
+  // Turnstile callbacks
+  window.onTurnstileSuccess = (token) => { tsToken = token; };
+  window.onTurnstileExpired = () => { tsToken = ""; };
+  window.onTurnstileError = () => { tsToken = ""; };
 
-window.onTurnstileExpired = () => {
-  tsToken = "";
-  // setStatus("Captcha expired", null);
-};
-
-window.onTurnstileError = () => {
-  tsToken = "";
-  // setStatus("Captcha error", null);
-};
-
+  // Get CID
   getBtn.addEventListener("click", async () => {
-  copiedMsg.style.display = "none";
-  const formatted = idInput.value;
-  const digits = onlyDigits(formatted);
-  const d = digits.length;
+    copiedMsg.style.display = "none";
+    afterRow.style.display = "none";
 
-  if (!digits || d < 6) {
-    showBox("Please enter a valid ID (at least 6 digits).", true);
-    return;
-  }
+    const iidDigits = onlyDigits(idInput.value);
 
-  setLoading(true);
-  showBox("Please wait…");
-
-  // 🔐 Get Turnstile token
-  const tsToken = document.querySelector(
-    'input[name="cf-turnstile-response"]'
-  )?.value;
-
-  if (!tsToken) {
-    setLoading(false);
-    showBox("Please complete the captcha first.", true);
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/get-cid", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: digits, tsToken }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      showBox(data.error || "Request failed.", true);
+    if (iidDigits.length !== REQUIRED_DIGITS) {
+      showBox(`Please enter a valid IID (${REQUIRED_DIGITS} digits).`, true);
       return;
     }
 
-    if (!data.cid) {
-      showBox("CID not found in API response.", true);
+    if (!tsToken) {
+      showBox("Please complete the captcha.", true);
       return;
     }
 
-    currentCID = String(data.cid);
-    showBox("CID: " + currentCID);
-    afterRow.style.display = "flex";
-  } catch (e) {
-    showBox("Request failed. Please try again in a moment.", true);
+    setLoading(true);
+    showBox("Please wait…");
 
-  } finally {
-    setLoading(false);
-    if (window.turnstile) window.turnstile.reset();
-  }
-});
+    try {
+      const res = await fetch("/api/get-cid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: iidDigits, tsToken })
+      });
 
+      const text = await res.text();
+      let data = {};
+      try { data = JSON.parse(text); }
+      catch { data = { error: text || "Request failed." }; }
 
+      if (!res.ok) {
+        showBox(data.error || `Request failed (HTTP ${res.status}).`, true);
+        return;
+      }
+
+      if (!data.cid) {
+        showBox("CID not found in API response.", true);
+        return;
+      }
+
+      currentCID = String(data.cid);
+      showBox("CID: " + currentCID + (data.cached ? " (cached)" : ""));
+      afterRow.style.display = "flex";
+
+    } catch {
+      showBox("Network error. Try again.", true);
+    } finally {
+      setLoading(false);
+      if (window.turnstile) window.turnstile.reset();
+      tsToken = "";
+    }
+  });
+
+  // Copy
   copyBtn.addEventListener("click", async () => {
     try{
       await navigator.clipboard.writeText(currentCID);
       copiedMsg.style.display = "block";
-      setTimeout(()=> copiedMsg.style.display = "none", 2000);
+      setTimeout(()=>copiedMsg.style.display="none",2000);
     } catch {
       alert("Copy failed. Please copy manually.");
-    }
-  });
-
-  healthLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try{
-      const res = await fetch("/api/get-cid", {
-        method:"POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({})
-      });
-      if(res.status === 400) showBox("✅ Server is reachable (API endpoint responded).");
-      else showBox("Server responded, status: " + res.status);
-    } catch {
-      showBox("❌ Server is not reachable. Start it with: node server.js", true);
     }
   });
 
