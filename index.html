@@ -256,6 +256,7 @@
 
 <script>
   const REQUIRED_DIGITS = 63;
+  const CID_GROUP_SIZE = 6; // ✅ تقسيم CID فالعرض
 
   const root = document.documentElement;
 
@@ -299,6 +300,12 @@
 
   function digitsCountFromFormatted(v){
     return onlyDigits(v).length;
+  }
+
+  // ✅ Format CID into groups of 6 (display only)
+  function formatCID(cid){
+    const digits = onlyDigits(cid);
+    return groupDigits(digits, CID_GROUP_SIZE);
   }
 
   function showBox(msg, err=false){
@@ -356,7 +363,7 @@
 
   setTheme(localStorage.getItem("theme") || "light");
 
-  // Group setting
+  // Group setting (IID grouping)
   const savedGroup = localStorage.getItem("groupSize");
   if(savedGroup === "6" || savedGroup === "7") groupSelect.value = savedGroup;
   else groupSelect.value = "7";
@@ -447,7 +454,10 @@
       }
 
       currentCID = String(data.cid);
-      showBox("CID: " + currentCID + (data.cached ? " (cached)" : ""));
+
+      // ✅ عرض CID مقسم ب 6
+      const cidFormatted = formatCID(currentCID);
+      showBox("CID: " + cidFormatted + (data.cached ? " (cached)" : ""));
       afterRow.style.display = "flex";
 
     } catch {
@@ -459,10 +469,10 @@
     }
   });
 
-  // Copy
+  // Copy (digits فقط)
   copyBtn.addEventListener("click", async () => {
     try{
-      await navigator.clipboard.writeText(currentCID);
+      await navigator.clipboard.writeText(onlyDigits(currentCID)); // ✅ بلا spaces
       copiedMsg.style.display = "block";
       setTimeout(()=>copiedMsg.style.display="none",2000);
     } catch {
